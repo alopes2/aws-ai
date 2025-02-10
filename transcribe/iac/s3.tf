@@ -23,7 +23,7 @@ resource "aws_s3_bucket_notification" "bucket" {
 
 resource "aws_lambda_permission" "eventbridge" {
   action        = "lambda:InvokeFunction"
-  function_name = data.transcribe.function_name
+  function_name = data.aws_lambda_function.transcribe.function_name
   source_arn    = aws_s3_bucket.bucket.arn
   principal     = "s3.amazonaws.com"
 }
