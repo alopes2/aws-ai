@@ -45,7 +45,7 @@ data "aws_iam_policy_document" "policies" {
   statement {
     effect = "Allow"
 
-    actions = ["transcribe:StartTranscriptionJob "]
+    actions = ["transcribe:StartTranscriptionJob"]
 
     resources = "arn:aws:transcribe:*:*:transcription-job/*"
   }
