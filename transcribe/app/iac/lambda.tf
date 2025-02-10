@@ -42,13 +42,13 @@ data "aws_iam_policy_document" "policies" {
     resources = ["arn:aws:logs:*:*:*"]
   }
 
-  statement {
-    effect = "Allow"
+  # statement {
+  #   effect = "Allow"
 
-    actions = ["iam:PassRole"]
+  #   actions = ["iam:PassRole"]
 
-    resources = [aws_iam_role.media_convert.arn]
-  }
+  #   resources = [aws_iam_role.media_convert.arn]
+  # }
 
   #   statement {
   #     effect = "Allow"
