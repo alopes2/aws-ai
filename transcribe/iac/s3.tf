@@ -26,6 +26,8 @@ resource "aws_s3_bucket_notification" "bucket" {
     events              = ["s3:ObjectCreated:*"]
     lambda_function_arn = data.aws_lambda_function.transcribe.arn
   }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
 }
 
 data "aws_lambda_function" "transcribe" {
