@@ -12,6 +12,11 @@ resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
+resource "aws_iam_role_policy" "policies" {
+  role   = aws_iam_role.role.name
+  policy = data.aws_iam_policy_document.policies.json
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -24,16 +29,35 @@ data "aws_iam_policy_document" "assume_role" {
     actions = ["sts:AssumeRole"]
   }
 }
+data "aws_iam_policy_document" "policies" {
+  statement {
+    effect = "Allow"
 
-# data "aws_iam_policy_document" "policies" {
-#   statement {
-#     effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
 
-#     actions = ["transcribe:StartTranscriptionJob "]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
 
-#     resources = "arn:aws:transcribe:*:*:*"
-#   }
-# }
+  statement {
+    effect = "Allow"
+
+    actions = ["iam:PassRole"]
+
+    resources = [aws_iam_role.media_convert.arn]
+  }
+
+  #   statement {
+  #     effect = "Allow"
+
+  #     actions = ["transcribe:StartTranscriptionJob "]
+
+  #     resources = "arn:aws:transcribe:*:*:*"
+  #   }
+}
 
 data "archive_file" "file" {
   source_dir  = "${path.root}/../src"
