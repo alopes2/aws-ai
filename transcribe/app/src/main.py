@@ -16,7 +16,7 @@ def handler(event, context):
     key = unquote_plus(record['s3']['object']['key'])
     fileInput = f"s3://{bucket}/{key}"
 
-    job_name = key + str(time.time())
+    job_name = key.replace("/", "_") + str(time.time()).replace(".","")
     
     media_format = key.split(".")[-1]
 
