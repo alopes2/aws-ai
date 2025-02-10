@@ -8,6 +8,8 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger()
 logger.setLevel("INFO")
 
+JOB_ROLE_ARN = os.environ["JOB_ROLE_ARN"]
+
 transcribe_client = boto3.client("transcribe")
 
 def handler(event, context):
@@ -27,7 +29,10 @@ def handler(event, context):
             "MediaFormat": media_format,
             "LanguageCode": "en-US",
             "OutputBucketName": bucket,
-            "OutputKey": f"transcription/{job_name}.txt"
+            "OutputKey": f"transcription/{job_name}.txt",
+            "JobExecutionSettings": {
+               "DataAccessRoleArn": JOB_ROLE_ARN
+            }
         }
 
         response = transcribe_client.start_transcription_job(**job_args)
