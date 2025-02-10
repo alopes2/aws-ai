@@ -12,6 +12,13 @@ resource "aws_s3_object" "transcription" {
   key    = "transcription/"
 }
 
+resource "aws_lambda_permission" "allow_bucket" {
+  action        = "lambda:InvokeFunction"
+  function_name = data.aws_lambda_function.transcribe.arn
+  source_arn    = aws_s3_bucket.bucket.arn
+  principal     = "s3.amazonaws.com"
+}
+
 resource "aws_s3_bucket_notification" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   lambda_function {
@@ -19,13 +26,6 @@ resource "aws_s3_bucket_notification" "bucket" {
     events              = ["s3:ObjectCreated:*"]
     lambda_function_arn = data.aws_lambda_function.transcribe.arn
   }
-}
-
-resource "aws_lambda_permission" "eventbridge" {
-  action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.transcribe.function_name
-  source_arn    = aws_s3_bucket.bucket.arn
-  principal     = "s3.amazonaws.com"
 }
 
 data "aws_lambda_function" "transcribe" {
