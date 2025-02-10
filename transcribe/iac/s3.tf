@@ -21,6 +21,14 @@ resource "aws_s3_bucket_notification" "bucket" {
   }
 }
 
+resource "aws_lambda_permission" "eventbridge" {
+  action        = "lambda:InvokeFunction"
+  function_name = data.convert_video.function_name
+  source_arn    = aws_s3_bucket.bucket.arn
+  principal     = "s3.amazonaws.com"
+}
+
 data "aws_lambda_function" "transcribe" {
   function_name = "transcribe"
 }
+
