@@ -22,7 +22,7 @@ resource "aws_lambda_permission" "allow_bucket" {
 resource "aws_s3_bucket_notification" "bucket" {
   bucket = aws_s3_bucket.bucket.id
   lambda_function {
-    filter_prefix       = "audio/"
+    filter_prefix       = aws_s3_object.audio.key
     events              = ["s3:ObjectCreated:*"]
     lambda_function_arn = data.aws_lambda_function.transcribe.arn
   }
