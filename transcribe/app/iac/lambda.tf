@@ -8,7 +8,7 @@ resource "aws_lambda_function" "transcribe" {
 
   environment {
     variables = {
-      JOB_ROLE_ARN = aws_iam_role.job_role.arn
+      JOB_ROLE_ARN = "${aws_iam_role.job_role.arn}"
     }
   }
 }
@@ -29,7 +29,7 @@ resource "aws_iam_role" "job_role" {
 }
 
 resource "aws_iam_role_policy" "job_policies" {
-  role   = aws_iam_role.role.name
+  role   = aws_iam_role.job_role.name
   policy = data.aws_iam_policy_document.job_policies.json
 }
 
