@@ -97,14 +97,14 @@ data "aws_iam_policy_document" "job_policies" {
 
     actions = ["s3:GetObject"]
 
-    resources = ["${aws_s3_object.audio.arn}*"]
+    resources = ["${data.aws_s3_object.audio.arn}*"]
   }
   statement {
     effect = "Allow"
 
     actions = ["s3:PutObject"]
 
-    resources = ["${aws_s3_object.transcription.arn}*"]
+    resources = ["${data.aws_s3_object.transcription.arn}*"]
   }
 }
 
@@ -112,4 +112,17 @@ data "archive_file" "file" {
   source_dir  = "${path.root}/../src"
   output_path = "lambda_payload.zip"
   type        = "zip"
+}
+data "aws_s3_bucket" "bucket" {
+  bucket = "aws-ai-transcribe"
+}
+
+data "aws_s3_object" "audio" {
+  bucket = data.aws_s3_bucket.bucket.id
+  key    = "audio/"
+}
+
+data "aws_s3_object" "transcription" {
+  bucket = data.aws_s3_bucket.bucket.id
+  key    = "transcription/"
 }
