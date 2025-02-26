@@ -14,7 +14,7 @@ resource "aws_s3_object" "transcription" {
 
 resource "aws_lambda_permission" "allow_bucket" {
   action        = "lambda:InvokeFunction"
-  function_name = data.aws_lambda_function.transcribe.arn
+  function_name = aws_lambda_function.transcribe.arn
   source_arn    = aws_s3_bucket.bucket.arn
   principal     = "s3.amazonaws.com"
 }
@@ -24,13 +24,8 @@ resource "aws_s3_bucket_notification" "bucket" {
   lambda_function {
     filter_prefix       = aws_s3_object.audio.key
     events              = ["s3:ObjectCreated:*"]
-    lambda_function_arn = data.aws_lambda_function.transcribe.arn
+    lambda_function_arn = aws_lambda_function.transcribe.arn
   }
 
   depends_on = [aws_lambda_permission.allow_bucket]
 }
-
-data "aws_lambda_function" "transcribe" {
-  function_name = "transcribe"
-}
-
