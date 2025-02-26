@@ -62,13 +62,13 @@ data "aws_iam_policy_document" "job_policies" {
 
     actions = ["s3:GetObject"]
 
-    resources = ["${data.aws_s3_object.audio.arn}*"]
+    resources = ["${aws_s3_object.audio.arn}*"]
   }
   statement {
     effect = "Allow"
 
     actions = ["s3:PutObject"]
 
-    resources = ["${data.aws_s3_object.transcription.arn}*"]
+    resources = ["${aws_s3_object.transcription.arn}*"]
   }
 }
