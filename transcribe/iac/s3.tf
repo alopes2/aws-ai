@@ -19,7 +19,7 @@ resource "aws_s3_object" "vocabulary_folder" {
 
 resource "aws_s3_object" "vocabulary" {
   bucket      = aws_s3_bucket.bucket.id
-  key         = "vocabulary.txt"
+  key         = "${aws_s3_object.vocabulary_folder.key}vocabulary.txt"
   source      = "${path.module}/transcribe/vocabulary.txt"
   source_hash = filemd5("${path.module}/transcribe/vocabulary.txt")
 }
