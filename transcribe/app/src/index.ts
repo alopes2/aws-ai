@@ -7,7 +7,7 @@ import {
 import type { S3Event } from 'aws-lambda';
 
 const JOB_ROLE_ARN = process.env.JOB_ROLE_ARN;
-const OUTPUT_KEY = process.env.OUTPUT_KEY;
+const OUTPUT_KEY = process.env.OUTPUT_KEY; // transcription/
 const transcribeClient = new TranscribeClient({});
 
 export const handler = async (event: S3Event) => {
@@ -34,7 +34,7 @@ export const handler = async (event: S3Event) => {
       MediaFormat: mediaFormat as MediaFormat,
       LanguageCode: 'en-US',
       OutputBucketName: bucket,
-      OutputKey: `${OUTPUT_KEY}/${jobName}.json`,
+      OutputKey: `${OUTPUT_KEY}${jobName}.json`,
       JobExecutionSettings: {
         DataAccessRoleArn: JOB_ROLE_ARN,
       },
