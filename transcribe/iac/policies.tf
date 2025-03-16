@@ -54,8 +54,6 @@ data "aws_iam_policy_document" "policies" {
   }
 }
 
-
-
 data "aws_iam_policy_document" "job_policies" {
   statement {
     effect = "Allow"
