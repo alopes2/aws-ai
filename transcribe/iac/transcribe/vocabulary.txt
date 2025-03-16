@@ -1,1 +1,4 @@
-AWS,AI,Serverless
+Phrase	SoundsLike	IPA	DisplayAs
+A.W.S.			AWS
+A.I.			AI
+Serverless			serverless
