@@ -50,7 +50,10 @@ data "aws_iam_policy_document" "policies" {
 
     actions = ["transcribe:StartTranscriptionJob"]
 
-    resources = ["arn:aws:transcribe:*:*:transcription-job/*"]
+    resources = [
+      "arn:aws:transcribe:*:*:transcription-job/*",
+      aws_transcribe_vocabulary.vocabulary.arn
+    ]
   }
 }
 
