@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc",
+    "build": "tsc && copyfiles package.json build/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/aws-sdk": "^0.0.42",
+    "copyfiles": "^2.4.1",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-transcribe": "^3.760.0",
+    "aws-sdk": "^2.1578.0"
+  }
+}

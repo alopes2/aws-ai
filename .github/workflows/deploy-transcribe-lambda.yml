@@ -9,15 +9,21 @@ on:
 
 defaults:
   run:
-    working-directory: transcribe/app/iac
+    working-directory: transcribe/app/
 
 jobs:
   deploy:
-    name: 'Deploy'
+    name: 'Deploy Lambda'
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository to the GitHub Actions runner
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Configure AWS Credentials Action For GitHub Actions
         uses: aws-actions/configure-aws-credentials@v1
@@ -26,24 +32,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
 
-      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Install packages
+        run: npm install
 
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-      - name: Terraform Init
-        run: terraform init
+      - name: Build
+        run: npm run build
 
-      # Checks that all Terraform configuration files adhere to a canonical format
-      - name: Terraform Format
-        run: terraform fmt -check
+      - name: Zip build
+        run: cd build && zip -r ../main.zip .
 
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        run: |
-          terraform plan -out=plan -input=false
-
-        # On push to "main", build or change infrastructure according to Terraform configuration files
-        # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false  plan
+      - name: Update Lambda code
+        run: aws lambda update-function-code --function-name=transcribe --zip-file=fileb://main.zip
