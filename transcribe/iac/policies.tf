@@ -90,11 +90,6 @@ data "aws_iam_policy_document" "transcribe_s3" {
   statement {
     effect = "Allow"
 
-    principals {
-      type        = "Service"
-      identifiers = ["transcribe.amazonaws.com"]
-    }
-
     actions = [
       "s3:GetObject",
       "s3:ListBucket"
