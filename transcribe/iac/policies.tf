@@ -95,6 +95,6 @@ data "aws_iam_policy_document" "transcribe_s3" {
       "s3:ListBucket"
     ]
 
-    resources = ["${aws_s3_object.clm.arn}*"]
+    resources = ["${aws_s3_object.clm.arn}**/*"]
   }
 }
