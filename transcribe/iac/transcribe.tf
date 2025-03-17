@@ -18,7 +18,7 @@ resource "aws_transcribe_vocabulary_filter" "inline" {
 
 resource "aws_transcribe_language_model" "model" {
   model_name      = "example"
-  base_model_name = "example"
+  base_model_name = "Narrowband" # If you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model
   language_code   = "en-US"
   input_data_config {
     s3_uri               = "s3://${aws_s3_object.training_data.bucket}/${aws_s3_object.training_data.key}"
