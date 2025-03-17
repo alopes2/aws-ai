@@ -92,12 +92,21 @@ data "aws_iam_policy_document" "transcribe_s3" {
 
     actions = [
       "s3:GetObject",
+    ]
+
+    resources = [
+      "${aws_s3_object.clm.arn}*",
+    ]
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
       "s3:ListBucket"
     ]
 
     resources = [
-      "${aws_s3_object.training_data.arn}*",
-      "${aws_s3_object.tune_data.arn}*"
+      "${aws_s3_bucket.bucket.arn}",
     ]
   }
 }
