@@ -1,7 +1,9 @@
 import {
   MediaFormat,
   StartTranscriptionJobCommand,
+  ToxicityCategory,
   TranscribeClient,
+  VocabularyFilterMethod,
   type StartTranscriptionJobRequest,
 } from '@aws-sdk/client-transcribe';
 import type { S3Event } from 'aws-lambda';
@@ -9,6 +11,7 @@ import type { S3Event } from 'aws-lambda';
 const JOB_ROLE_ARN = process.env.JOB_ROLE_ARN;
 const OUTPUT_KEY = process.env.OUTPUT_KEY; // transcription/
 const vocabularyName = process.env.VOCABULARY_NAME;
+const vocabularyFilterName = process.env.VOCABULARY_FILTER_NAME;
 
 const transcribeClient = new TranscribeClient({});
 
@@ -42,6 +45,8 @@ export const handler = async (event: S3Event) => {
       },
       Settings: {
         VocabularyName: vocabularyName,
+        VocabularyFilterMethod: VocabularyFilterMethod.MASK,
+        VocabularyFilterName: vocabularyFilterName,
       },
     };
 

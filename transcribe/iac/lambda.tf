@@ -8,9 +8,10 @@ resource "aws_lambda_function" "transcribe" {
 
   environment {
     variables = {
-      JOB_ROLE_ARN    = "${aws_iam_role.job_role.arn}"
-      OUTPUT_KEY      = "${aws_s3_object.transcription.key}"
-      VOCABULARY_NAME = "${aws_transcribe_vocabulary.vocabulary.vocabulary_name}"
+      JOB_ROLE_ARN           = "${aws_iam_role.job_role.arn}"
+      OUTPUT_KEY             = "${aws_s3_object.transcription.key}"
+      VOCABULARY_NAME        = "${aws_transcribe_vocabulary.vocabulary.vocabulary_name}"
+      VOCABULARY_FILTER_NAME = "${aws_transcribe_vocabulary_filter.filter.vocabulary_filter_name}"
     }
   }
 }
