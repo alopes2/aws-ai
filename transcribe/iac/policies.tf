@@ -53,7 +53,8 @@ data "aws_iam_policy_document" "policies" {
     resources = [
       "arn:aws:transcribe:*:*:transcription-job/*",
       aws_transcribe_vocabulary.vocabulary.arn,
-      aws_transcribe_vocabulary_filter.filter.arn
+      aws_transcribe_vocabulary_filter.filter.arn,
+      aws_transcribe_language_model.model.arn
     ]
   }
 }
