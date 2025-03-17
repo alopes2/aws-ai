@@ -24,6 +24,18 @@ resource "aws_s3_object" "vocabulary" {
   source_hash = filemd5("${path.module}/transcribe/vocabulary.txt")
 }
 
+resource "aws_s3_object" "vocabulary_filters_folder" {
+  bucket = aws_s3_bucket.bucket.id
+  key    = "vocabulary_filters/"
+}
+
+resource "aws_s3_object" "vocabulary_filter" {
+  bucket      = aws_s3_bucket.bucket.id
+  key         = "${aws_s3_object.vocabulary_filters_folder.key}vocabulary_filter.txt"
+  source      = "${path.module}/transcribe/vocabulary_filter.txt"
+  source_hash = filemd5("${path.module}/transcribe/vocabulary_filter.txt")
+}
+
 resource "aws_lambda_permission" "allow_bucket" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.transcribe.arn
