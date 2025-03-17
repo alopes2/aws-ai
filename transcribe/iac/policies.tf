@@ -74,3 +74,32 @@ data "aws_iam_policy_document" "job_policies" {
     resources = ["${aws_s3_object.transcription.arn}*"]
   }
 }
+
+data "aws_iam_policy_document" "transcribe_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["transcribe.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "transcribe_s3" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["transcribe.amazonaws.com"]
+    }
+
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+
+    resources = ["${aws_s3_object.clm.arn}*"]
+  }
+}
