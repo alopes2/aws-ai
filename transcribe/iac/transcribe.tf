@@ -17,9 +17,13 @@ resource "aws_transcribe_vocabulary_filter" "inline" {
 }
 
 resource "aws_transcribe_language_model" "model" {
-  model_name      = "example"
-  base_model_name = "Narrowband" # If you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model
-  language_code   = "en-US"
+  model_name = "example"
+
+  //NarrowBand: Use this option for audio with a sample rate of less than 16,000 Hz. This model type is typically used for telephone conversations recorded at 8,000 Hz.
+  // WideBand: Use this option for audio with a sample rate greater than or equal to 16,000 Hz.
+  base_model_name = "NarrowBand"
+
+  language_code = "en-US"
   input_data_config {
     s3_uri               = "s3://${aws_s3_object.training_data.bucket}/${aws_s3_object.training_data.key}"
     tuning_data_s3_uri   = "s3://${aws_s3_object.tune_data.bucket}/${aws_s3_object.tune_data.key}"
