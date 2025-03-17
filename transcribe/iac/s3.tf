@@ -73,7 +73,7 @@ resource "aws_s3_object" "xbox" {
   source_hash = filemd5("${path.module}/training_data/XboxSeries.txt")
 }
 
-resource "aws_s3_object" "tune_data" {
+resource "aws_s3_object" "tune_data_file" {
   bucket      = aws_s3_bucket.bucket.id
   key         = "${aws_s3_object.tune_data.key}tune_data.txt"
   source      = "${path.module}/tune_data/tune_data.txt"
