@@ -1,5 +1,7 @@
 import {
   MediaFormat,
+  PiiEntityType,
+  RedactionOutput,
   StartTranscriptionJobCommand,
   ToxicityCategory,
   TranscribeClient,
@@ -47,6 +49,15 @@ export const handler = async (event: S3Event) => {
         VocabularyName: vocabularyName,
         VocabularyFilterMethod: VocabularyFilterMethod.MASK,
         VocabularyFilterName: vocabularyFilterName,
+      },
+      ContentRedaction: {
+        RedactionOutput: RedactionOutput.REDACTED,
+        RedactionType: 'PII', // Only value allowed
+        // If PiiEntityTypes is not provided, all PII data is redacted
+        PiiEntityTypes: [
+          PiiEntityType.CREDIT_DEBIT_NUMBER,
+          PiiEntityType.BANK_ACCOUNT_NUMBER,
+        ],
       },
     };
 
