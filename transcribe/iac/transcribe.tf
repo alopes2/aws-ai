@@ -21,7 +21,7 @@ resource "aws_transcribe_language_model" "model" {
 
   //NarrowBand: Use this option for audio with a sample rate of less than 16,000 Hz. This model type is typically used for telephone conversations recorded at 8,000 Hz.
   // WideBand: Use this option for audio with a sample rate greater than or equal to 16,000 Hz.
-  base_model_name = "NarrowBand"
+  base_model_name = "WideBand"
 
   language_code = "en-US"
   input_data_config {
