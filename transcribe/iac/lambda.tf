@@ -12,6 +12,7 @@ resource "aws_lambda_function" "transcribe" {
       OUTPUT_KEY             = "${aws_s3_object.transcription.key}"
       VOCABULARY_NAME        = "${aws_transcribe_vocabulary.vocabulary.vocabulary_name}"
       VOCABULARY_FILTER_NAME = "${aws_transcribe_vocabulary_filter.filter.vocabulary_filter_name}"
+      CUSTOM_MODEL           = "${aws_transcribe_language_model.model.model_name}"
     }
   }
 }

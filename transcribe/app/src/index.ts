@@ -14,6 +14,7 @@ const JOB_ROLE_ARN = process.env.JOB_ROLE_ARN;
 const OUTPUT_KEY = process.env.OUTPUT_KEY; // transcription/
 const vocabularyName = process.env.VOCABULARY_NAME;
 const vocabularyFilterName = process.env.VOCABULARY_FILTER_NAME;
+const customModel = process.env.CUSTOM_MODEL;
 
 const transcribeClient = new TranscribeClient({});
 
@@ -49,6 +50,9 @@ export const handler = async (event: S3Event) => {
         VocabularyName: vocabularyName,
         VocabularyFilterMethod: VocabularyFilterMethod.MASK,
         VocabularyFilterName: vocabularyFilterName,
+      },
+      ModelSettings: {
+        LanguageModelName: customModel,
       },
       ContentRedaction: {
         RedactionOutput: RedactionOutput.REDACTED,
