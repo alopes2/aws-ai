@@ -5,16 +5,19 @@ resource "aws_apigatewayv2_api" "api" {
 }
 
 resource "aws_apigatewayv2_stage" "stage" {
-  api_id = aws_apigatewayv2_api.api.id
-  name   = "live"
+  api_id      = aws_apigatewayv2_api.api.id
+  name        = "live"
+  auto_deploy = true
 }
 
 resource "aws_apigatewayv2_route" "example" {
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.default.id}"
+
 }
 
-resource "aws_apigatewayv2_integration" "example" {
+resource "aws_apigatewayv2_integration" "default" {
   api_id           = aws_apigatewayv2_api.api.id
   integration_type = "AWS_PROXY"
 
