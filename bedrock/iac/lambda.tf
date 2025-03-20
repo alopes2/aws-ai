@@ -24,7 +24,7 @@ resource "aws_iam_role_policy" "policies" {
 }
 
 data "archive_file" "file" {
-  source_file = "${path.module}/init_code/main"
+  source_file = "${path.module}/init_code/bootstrap"
   output_path = "lambda_payload.zip"
   type        = "zip"
 }
