@@ -2,6 +2,7 @@ resource "aws_lambda_function" "transcribe" {
   function_name    = "bedrock"
   runtime          = "provided.al2023"
   handler          = "main"
+  architectures    = ["arm64"]
   filename         = data.archive_file.file.output_path
   source_code_hash = data.archive_file.file.output_base64sha256
   role             = aws_iam_role.role.arn
