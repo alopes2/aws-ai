@@ -1,11 +1,6 @@
 name: Destroy Bedrock Infra
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - bedrock/iac/**/*
 
 defaults:
   run:

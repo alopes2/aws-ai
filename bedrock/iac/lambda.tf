@@ -8,7 +8,7 @@ resource "aws_lambda_function" "transcribe" {
 
   environment {
     variables = {
-      MODEL = "${data.aws_bedrock_foundation_model}"
+      MODEL = "${data.aws_bedrock_foundation_model.titan_text_express.model_id}"
     }
   }
 }
@@ -21,16 +21,6 @@ resource "aws_iam_role" "role" {
 resource "aws_iam_role_policy" "policies" {
   role   = aws_iam_role.role.name
   policy = data.aws_iam_policy_document.policies.json
-}
-
-resource "aws_iam_role" "job_role" {
-  name               = "bedrock-job-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_job_role.json
-}
-
-resource "aws_iam_role_policy" "job_policies" {
-  role   = aws_iam_role.job_role.name
-  policy = data.aws_iam_policy_document.job_policies.json
 }
 
 data "archive_file" "file" {

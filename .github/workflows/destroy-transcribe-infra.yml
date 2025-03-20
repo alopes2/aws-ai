@@ -1,11 +1,6 @@
 name: Destroy Transcribe Infra
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - transcribe/iac/**/*
 
 defaults:
   run:
