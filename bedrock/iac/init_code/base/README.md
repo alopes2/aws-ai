@@ -8,11 +8,11 @@ To generate the excutable, just run:
 Linux:
 
 ```bash
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ../bootstrap
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o ../bootstrap
 ```
 
 Windows (Powershell):
 
 ```powershell
-$env:GOOS='linux'; $env:GOARCH='amd64'; $env:CGO_ENABLED=0; go build -o ../bootstrap
+$env:GOOS='linux'; $env:GOARCH='arm64'; $env:CGO_ENABLED=0; go build -o ../bootstrap
 ```

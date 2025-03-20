@@ -1,4 +1,4 @@
-resource "aws_lambda_function" "transcribe" {
+resource "aws_lambda_function" "bedrock" {
   function_name    = "bedrock"
   runtime          = "provided.al2023"
   handler          = "bootstrap"
