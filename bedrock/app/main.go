@@ -50,7 +50,7 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 	}
 
 	input := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(""),
+		ModelId:     aws.String(h.modelID),
 		ContentType: aws.String("application/json"),
 		Accept:      aws.String("application/json"),
 		Body:        modelRequestBody,
