@@ -33,7 +33,7 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 		log.Fatal("Could not unmarshal request body")
 	}
 
-	promptTemplate := "User:%s \nAssistant:"
+	promptTemplate := "User: %s"
 	inputText := fmt.Sprintf(promptTemplate, requestBody.message)
 	modelRequest := requests.TitanTextRequest{
 		InputText: inputText,
