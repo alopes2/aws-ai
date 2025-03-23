@@ -50,7 +50,7 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 		log.Fatal("Could not marshal model request body")
 	}
 
-	log.Printf("Sending input %d to model %s", inputText, h.modelID)
+	log.Printf("Sending input %s to model %s", inputText, h.modelID)
 
 	input := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(h.modelID),

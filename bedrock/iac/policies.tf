@@ -23,4 +23,13 @@ data "aws_iam_policy_document" "policies" {
 
     resources = ["arn:aws:logs:*:*:*"]
   }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "bedrock:InvokeModel",
+    ]
+
+    resources = [data.aws_bedrock_foundation_model.titan_text_express.model_arn]
+  }
 }
