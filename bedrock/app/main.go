@@ -34,8 +34,9 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 	}
 
 	promptTemplate := "User:%s \nAssistant:"
+	inputText := fmt.Sprintf(promptTemplate, requestBody.message)
 	modelRequest := requests.TitanTextRequest{
-		InputText: fmt.Sprintf(promptTemplate, requestBody.message),
+		InputText: inputText,
 		TextGenerationConfig: requests.TitanTextGenerationConfig{
 			Temperature:   0.5,
 			TopP:          0.9,
@@ -48,6 +49,8 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 	if err != nil {
 		log.Fatal("Could not marshal model request body")
 	}
+
+	log.Printf("Sending input %d to model %s", inputText, h.modelID)
 
 	input := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(h.modelID),

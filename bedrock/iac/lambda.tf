@@ -9,7 +9,7 @@ resource "aws_lambda_function" "bedrock" {
 
   environment {
     variables = {
-      MODEL = "${data.aws_bedrock_foundation_model.titan_text_express.model_id}"
+      MODEL_ID = "${data.aws_bedrock_foundation_model.titan_text_express.model_id}"
     }
   }
 }
