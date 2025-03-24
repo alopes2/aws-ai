@@ -26,12 +26,15 @@ type handler struct {
 
 func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebsocketProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	log.Printf("Received event %+v", event)
+
 	var requestBody request
 	err := json.Unmarshal([]byte(event.Body), &requestBody)
 
 	if err != nil {
 		log.Fatal("Could not unmarshal request body")
 	}
+
+	log.Printf("Got user prompt message %s", requestBody.message)
 
 	promptTemplate := "User: %s"
 	inputText := fmt.Sprintf(promptTemplate, requestBody.message)
