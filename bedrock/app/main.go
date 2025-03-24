@@ -16,7 +16,7 @@ import (
 )
 
 type request struct {
-	message string `json:"message"`
+	Message string `json:"message"`
 }
 
 type handler struct {
@@ -34,10 +34,10 @@ func (h *handler) handleRequest(ctx context.Context, event events.APIGatewayWebs
 		log.Fatal("Could not unmarshal request body")
 	}
 
-	log.Printf("Got user prompt message %s", requestBody.message)
+	log.Printf("Got user prompt message %s", requestBody.Message)
 
 	promptTemplate := "User: %s"
-	inputText := fmt.Sprintf(promptTemplate, requestBody.message)
+	inputText := fmt.Sprintf(promptTemplate, requestBody.Message)
 	modelRequest := requests.TitanTextRequest{
 		InputText: inputText,
 		TextGenerationConfig: requests.TitanTextGenerationConfig{
