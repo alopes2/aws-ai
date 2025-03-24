@@ -6,6 +6,7 @@ resource "aws_lambda_function" "bedrock" {
   filename         = data.archive_file.file.output_path
   source_code_hash = data.archive_file.file.output_base64sha256
   role             = aws_iam_role.role.arn
+  timeout          = 30
 
   environment {
     variables = {
