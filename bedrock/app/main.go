@@ -16,7 +16,7 @@ import (
 )
 
 type request struct {
-	message string `json:message`
+	message string `json:"message"`
 }
 
 type handler struct {
