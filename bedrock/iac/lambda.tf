@@ -10,7 +10,7 @@ resource "aws_lambda_function" "bedrock" {
 
   environment {
     variables = {
-      MODEL_ID = "${data.aws_bedrock_inference_profile.claude.inference_profile_arn}"
+      MODEL_ID = "${data.aws_bedrock_foundation_model.titan_express.model_id}"
     }
   }
 }

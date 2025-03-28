@@ -70,8 +70,6 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, erro
 		return "", err
 	}
 
-	log.Printf("Got response %+v", response)
-
 	outputMessage, _ := response.Output.(*types.ConverseOutputMemberMessage)
 
 	text, _ := outputMessage.Value.Content[0].(*types.ContentBlockMemberText)

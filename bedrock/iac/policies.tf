@@ -31,6 +31,7 @@ data "aws_iam_policy_document" "policies" {
     ]
 
     resources = [
+      data.aws_bedrock_foundation_model.titan_express.model_arn,
       "arn:aws:bedrock:*::foundation-model/${data.aws_bedrock_foundation_model.claude.model_id}",
       data.aws_bedrock_inference_profile.claude.inference_profile_arn
     ]
