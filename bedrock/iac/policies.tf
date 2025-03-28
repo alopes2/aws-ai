@@ -30,6 +30,6 @@ data "aws_iam_policy_document" "policies" {
       "bedrock:InvokeModel",
     ]
 
-    resources = [data.aws_bedrock_foundation_model.titan_text_express.model_arn]
+    resources = [data.aws_bedrock_foundation_model.claude.model_arn]
   }
 }

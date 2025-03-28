@@ -10,7 +10,7 @@ resource "aws_lambda_function" "bedrock" {
 
   environment {
     variables = {
-      MODEL_ID = "${data.aws_bedrock_foundation_model.titan_text_express.model_id}"
+      MODEL_ID = "${data.aws_bedrock_foundation_model.claude.model_id}"
     }
   }
 }
@@ -30,4 +30,3 @@ data "archive_file" "file" {
   output_path = "lambda_payload.zip"
   type        = "zip"
 }
-
