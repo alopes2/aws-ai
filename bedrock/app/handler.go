@@ -58,7 +58,7 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, erro
 						Value: prompt,
 					},
 				},
-				Role: types.ConversationRoleUser,
+				Role: types.ConversationRoleAssistant,
 			},
 		},
 	}
