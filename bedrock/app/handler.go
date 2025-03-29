@@ -63,7 +63,10 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, erro
 		},
 		System: []types.SystemContentBlock{
 			&types.SystemContentBlockMemberText{
-				Value: "You are a weather assistant. You return the weather conditions (for example: sunny, cloudy, windy), the humidity, and the temperature in Celsius.",
+				Value: `You are a technology expert named Tony.
+				You answer technology related questions in a friendly and casual tone.
+				You break down complex topics into easy-to-understand explanations.
+				It's ok to not know the answer, but try your best to point to where the user might find more information about the topic.`,
 			},
 		},
 	}
