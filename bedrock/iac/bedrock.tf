@@ -1,5 +1,5 @@
-data "aws_bedrock_foundation_model" "titan_express" {
-  model_id = "amazon.titan-text-express-v1"
+data "aws_bedrock_foundation_model" "model" {
+  model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 }
 
 data "aws_bedrock_foundation_model" "claude" {
