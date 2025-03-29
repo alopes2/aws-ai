@@ -58,12 +58,32 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, erro
 						Value: prompt,
 					},
 				},
-				Role: types.ConversationRoleAssistant,
+				Role: types.ConversationRoleUser,
+			},
+		},
+		System: []types.SystemContentBlock{
+			&types.SystemContentBlockMemberText{
+				Value: "You are a weather assistant. You return the weather conditions (for example: sunny, cloudy, windy), the humidity, and the temperature in Celsius.",
 			},
 		},
 	}
 
+	// input := &bedrockruntime.ConverseStreamInput{
+	// 	ModelId: aws.String(h.modelID),
+	// 	Messages: []types.Message{
+	// 		{
+	// 			Content: []types.ContentBlock{
+	// 				&types.ContentBlockMemberText{
+	// 					Value: prompt,
+	// 				},
+	// 			},
+	// 			Role: types.ConversationRoleUser,
+	// 		},
+	// 	},
+	// }
+
 	response, err := h.bedrockClient.Converse(*ctx, input)
+	// response, err := h.bedrockClient.ConverseStream(*ctx, input, func(o *bedrockruntime.Options) {})
 
 	if err != nil {
 		log.Printf("Failed to invoke model with error %s", err.Error())
