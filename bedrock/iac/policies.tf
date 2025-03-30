@@ -27,7 +27,8 @@ data "aws_iam_policy_document" "policies" {
     effect = "Allow"
 
     actions = [
-      "bedrock:InvokeModel",
+      # "bedrock:InvokeModel",
+      "bedrock:InvokeModelWithResponseStream"
     ]
 
     resources = [
