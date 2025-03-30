@@ -5,5 +5,10 @@ type Request struct {
 }
 
 type Response struct {
-	Text string `json:"text"`
+	Message *Message `json:"message"`
+}
+
+type Message struct {
+	Role    string   `json:"role"`
+	Content []string `json:"content"`
 }

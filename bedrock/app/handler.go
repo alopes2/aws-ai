@@ -35,7 +35,7 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 	response, err := h.callBedrock(request.Prompt, &ctx)
 
 	responseBody, _ := json.Marshal(Response{
-		Text: response,
+		Message: response,
 	})
 
 	apiResponse := &events.APIGatewayProxyResponse{
@@ -46,10 +46,32 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 	return apiResponse, nil
 }
 
-func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, error) {
+func (h *Handler) callBedrock(prompt string, ctx *context.Context) (*Message, error) {
 	log.Printf("Sending input %s to model %s", prompt, h.modelID)
 
-	input := &bedrockruntime.ConverseInput{
+	// input := &bedrockruntime.ConverseInput{
+	// 	ModelId: aws.String(h.modelID),
+	// 	Messages: []types.Message{
+	// 		{
+	// 			Content: []types.ContentBlock{
+	// 				&types.ContentBlockMemberText{
+	// 					Value: prompt,
+	// 				},
+	// 			},
+	// 			Role: types.ConversationRoleUser,
+	// 		},
+	// 	},
+	// 	System: []types.SystemContentBlock{
+	// 		&types.SystemContentBlockMemberText{
+	// 			Value: `You are a technology expert named Tony.
+	// 			You answer technology related questions in a friendly and casual tone.
+	// 			You break down complex topics into easy-to-understand explanations.
+	// 			It's ok to not know the answer, but try your best to point to where the user might find more information about the topic.`,
+	// 		},
+	// 	},
+	// }
+
+	input := &bedrockruntime.ConverseStreamInput{
 		ModelId: aws.String(h.modelID),
 		Messages: []types.Message{
 			{
@@ -71,33 +93,50 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (string, erro
 		},
 	}
 
-	// input := &bedrockruntime.ConverseStreamInput{
-	// 	ModelId: aws.String(h.modelID),
-	// 	Messages: []types.Message{
-	// 		{
-	// 			Content: []types.ContentBlock{
-	// 				&types.ContentBlockMemberText{
-	// 					Value: prompt,
-	// 				},
-	// 			},
-	// 			Role: types.ConversationRoleUser,
-	// 		},
-	// 	},
-	// }
-
-	response, err := h.bedrockClient.Converse(*ctx, input)
-	// response, err := h.bedrockClient.ConverseStream(*ctx, input, func(o *bedrockruntime.Options) {})
+	// response, err := h.bedrockClient.Converse(*ctx, input)
+	response, err := h.bedrockClient.ConverseStream(*ctx, input)
 
 	if err != nil {
 		log.Printf("Failed to invoke model with error %s", err.Error())
-		return "", err
+		return nil, err
 	}
 
-	outputMessage, _ := response.Output.(*types.ConverseOutputMemberMessage)
+	outputMessage := response.GetStream().Events()
 
-	text, _ := outputMessage.Value.Content[0].(*types.ContentBlockMemberText)
+	var combinedResult string
 
-	return text.Value, nil
+	msg := Message{}
+
+	for event := range outputMessage {
+		switch e := event.(type) {
+		case *types.ConverseStreamOutputMemberContentBlockDelta:
+			textResponse := e.Value.Delta.(*types.ContentBlockDeltaMemberText)
+			combinedResult = combinedResult + textResponse.Value
+
+		case *types.ConverseStreamOutputMemberMessageStart:
+			log.Print("Message start")
+			msg.Role = string(e.Value.Role)
+
+		case *types.ConverseStreamOutputMemberMessageStop:
+			log.Printf("Message stop. Reason: %s", e.Value.StopReason)
+
+		case *types.ConverseStreamOutputMemberContentBlockStart:
+			log.Print("Content block start")
+			combinedResult = ""
+
+		case *types.ConverseStreamOutputMemberContentBlockStop:
+			log.Print("Content block stop")
+			msg.Content = append(msg.Content, combinedResult)
+
+		case *types.UnknownUnionMember:
+			log.Printf("unknown tag: %s", e.Tag)
+
+		default:
+			log.Printf("Received unexpected event type: %T", e)
+		}
+	}
+
+	return &msg, nil
 }
 
 func NewHandler(config aws.Config, modelID string) *Handler {
