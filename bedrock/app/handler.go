@@ -35,7 +35,7 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 	response, err := h.callBedrock(request.Prompt, &ctx)
 
 	responseBody, _ := json.Marshal(Response{
-		Message: response,
+		Messages: response.Content,
 	})
 
 	apiResponse := &events.APIGatewayProxyResponse{
@@ -103,6 +103,12 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (*Message, er
 
 	outputMessage := response.GetStream().Events()
 
+	msg := handleOutput(outputMessage)
+
+	return msg, nil
+}
+
+func handleOutput(outputMessage <-chan types.ConverseStreamOutput) *Message {
 	var combinedResult string
 
 	msg := Message{}
@@ -128,6 +134,9 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (*Message, er
 			log.Print("Content block stop")
 			msg.Content = append(msg.Content, combinedResult)
 
+		case *types.ConverseStreamOutputMemberMetadata:
+			log.Printf("Metadata %+v", e.Value)
+
 		case *types.UnknownUnionMember:
 			log.Printf("unknown tag: %s", e.Tag)
 
@@ -136,7 +145,7 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context) (*Message, er
 		}
 	}
 
-	return &msg, nil
+	return &msg
 }
 
 func NewHandler(config aws.Config, modelID string) *Handler {
