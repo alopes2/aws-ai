@@ -46,6 +46,14 @@ resource "aws_apigatewayv2_integration" "default" {
   passthrough_behavior      = "WHEN_NO_MATCH"
 }
 
+resource "aws_lambda_permission" "bedrock" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.bedrock.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*"
+}
+
 resource "aws_apigatewayv2_integration" "connections" {
   api_id           = aws_apigatewayv2_api.api.id
   integration_type = "AWS_PROXY"
@@ -56,4 +64,12 @@ resource "aws_apigatewayv2_integration" "connections" {
   integration_method        = "POST"
   integration_uri           = aws_lambda_function.connection.invoke_arn
   passthrough_behavior      = "WHEN_NO_MATCH"
+}
+
+resource "aws_lambda_permission" "connection" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.connection.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*"
 }
