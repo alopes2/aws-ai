@@ -20,6 +20,6 @@ resource "aws_iam_role" "connection_role" {
 }
 
 resource "aws_iam_role_policy" "connection_policies" {
-  role   = aws_iam_role.role.name
+  role   = aws_iam_role.connection_role.name
   policy = data.aws_iam_policy_document.connection_lambda_policies.json
 }
