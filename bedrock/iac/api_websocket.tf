@@ -2,11 +2,12 @@ resource "aws_apigatewayv2_api" "api" {
   name                       = "bedrock"
   protocol_type              = "WEBSOCKET"
   route_selection_expression = "$request.body.action"
-  cors_configuration {
-    allow_headers = ["*"]
-    allow_methods = ["*"]
-    allow_origins = ["*"]
-  }
+  # Not supported for WebSockets APIs
+  # cors_configuration {
+  #   allow_headers = ["*"]
+  #   allow_methods = ["*"]
+  #   allow_origins = ["*"]
+  # }
 }
 
 resource "aws_apigatewayv2_stage" "stage" {
