@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - bedrock/app/**/*
+      - bedrock/apps/bedrock/**/*
 
 defaults:
   run:
-    working-directory: bedrock/app/
+    working-directory: bedrock/apps/bedrock
 
 jobs:
   deploy:

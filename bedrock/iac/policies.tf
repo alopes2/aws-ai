@@ -38,3 +38,29 @@ data "aws_iam_policy_document" "policies" {
     ]
   }
 }
+
+data "aws_iam_policy_document" "connection_lambda_policies" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
+    ]
+
+    resources = [
+      aws_dynamodb_table.connections.arn
+    ]
+  }
+}
