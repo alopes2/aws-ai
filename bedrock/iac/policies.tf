@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "policies" {
     ]
 
     resources = [
-      "${aws_apigatewayv2_stage.stage.execution_arn}/*"
+      "${aws_apigatewayv2_stage.stage.execution_arn}/POST/@connections/{connectionId}"
     ]
   }
 }
