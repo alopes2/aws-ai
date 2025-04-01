@@ -66,7 +66,7 @@ resource "aws_apigatewayv2_integration" "connections" {
   passthrough_behavior      = "WHEN_NO_MATCH"
 }
 
-resource "aws_lambda_permission" "connection" {
+resource "aws_lambda_permission" "connect" {
   statement_id  = "AllowConnectExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.connection.function_name
@@ -74,7 +74,7 @@ resource "aws_lambda_permission" "connection" {
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.connect.route_key}"
 }
 
-resource "aws_lambda_permission" "connection" {
+resource "aws_lambda_permission" "disconnect" {
   statement_id  = "AllowDisconnectExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.connection.function_name
