@@ -177,7 +177,7 @@ func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textRes
 	log.Printf("Sending to websocket %+v", data)
 
 	websocketInput := &apigatewaymanagementapi.PostToConnectionInput{
-		ConnectionId: &connectionID,
+		ConnectionId: aws.String(connectionID),
 		Data:         []byte(data),
 	}
 
