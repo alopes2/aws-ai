@@ -181,9 +181,13 @@ func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textRes
 		Data:         []byte(data),
 	}
 
-	response, _ := h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
+	response, err := h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
 
-	log.Printf("Output from websocket %+v", *response)
+	if err != nil {
+		log.Printf("ERROR %+v", err)
+	}
+
+	log.Printf("Output from websocket %+v", response)
 }
 
 func NewHandler(config aws.Config) *Handler {
