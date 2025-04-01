@@ -23,6 +23,7 @@ data "aws_iam_policy_document" "policies" {
 
     resources = ["arn:aws:logs:*:*:*"]
   }
+
   statement {
     effect = "Allow"
 
@@ -35,6 +36,18 @@ data "aws_iam_policy_document" "policies" {
       data.aws_bedrock_foundation_model.model.model_arn,
       "arn:aws:bedrock:*::foundation-model/${data.aws_bedrock_foundation_model.claude.model_id}",
       data.aws_bedrock_inference_profile.claude.inference_profile_arn
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "execute-api:ManageConnections"
+    ]
+
+    resources = [
+      "${aws_apigatewayv2_stage.stage.execution_arn}/*"
     ]
   }
 }
