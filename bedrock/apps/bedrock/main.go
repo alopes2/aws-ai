@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -15,7 +14,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h := NewHandler(cfg, os.Getenv("MODEL_ID"))
+	h := NewHandler(cfg)
 
 	lambda.Start(h.HandleRequest)
 }

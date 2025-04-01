@@ -10,7 +10,8 @@ resource "aws_lambda_function" "bedrock" {
 
   environment {
     variables = {
-      MODEL_ID = "${data.aws_bedrock_foundation_model.model.model_id}"
+      MODEL_ID             = "${data.aws_bedrock_foundation_model.model.model_id}"
+      API_GATEWAY_ENDPOINT = "https://${aws_apigatewayv2_stage.stage.api_id}/${aws_apigatewayv2_stage.stage.name}"
     }
   }
 }
