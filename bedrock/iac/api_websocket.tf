@@ -47,11 +47,11 @@ resource "aws_apigatewayv2_integration" "default" {
 }
 
 resource "aws_lambda_permission" "bedrock" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowDefaultExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.bedrock.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.default.route_key}"
 }
 
 resource "aws_apigatewayv2_integration" "connections" {
@@ -67,9 +67,17 @@ resource "aws_apigatewayv2_integration" "connections" {
 }
 
 resource "aws_lambda_permission" "connection" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowConnectExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.connection.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.connect.route_key}"
+}
+
+resource "aws_lambda_permission" "connection" {
+  statement_id  = "AllowDisconnectExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.connection.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.disconnect.route_key}"
 }
