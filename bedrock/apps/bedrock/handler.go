@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -158,7 +159,7 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 
 		case *types.ConverseStreamOutputMemberMetadata:
 			log.Printf("Metadata %+v", e.Value)
-			h.SendWebSocketMessageToConnection(ctx, "", "metadata", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, fmt.Sprintf("%+v", e.Value), "metadata", connectionID)
 
 		case *types.UnknownUnionMember:
 			log.Printf("unknown tag: %s", e.Tag)
