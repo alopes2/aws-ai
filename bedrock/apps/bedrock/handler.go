@@ -174,12 +174,16 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textResponse string, event string, connectionID string) {
 	data, _ := json.Marshal(WebSocketResponse{Event: event, Data: textResponse})
 
+	log.Printf("Sending to websocket %+v", data)
+
 	websocketInput := &apigatewaymanagementapi.PostToConnectionInput{
 		ConnectionId: &connectionID,
 		Data:         []byte(data),
 	}
 
-	_, _ = h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
+	response, _ := h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
+
+	log.Printf("Output from websocket %+v", *response)
 }
 
 func NewHandler(config aws.Config) *Handler {
