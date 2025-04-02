@@ -94,7 +94,7 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 
 	blah2, _ := json.Marshal(blah)
 
-	log.Printf("Input Schema Lazy Document %+v", string(blah2))
+	log.Printf("Input Schema Lazy Document %s", string(blah2))
 
 	input := &bedrockruntime.ConverseStreamInput{
 		ModelId: aws.String(h.modelID),
