@@ -22,18 +22,6 @@ resource "aws_apigatewayv2_route" "default" {
   target    = "integrations/${aws_apigatewayv2_integration.default.id}"
 }
 
-resource "aws_apigatewayv2_route" "connect" {
-  api_id    = aws_apigatewayv2_api.api.id
-  route_key = "$connect"
-  target    = "integrations/${aws_apigatewayv2_integration.connections.id}"
-}
-
-resource "aws_apigatewayv2_route" "disconnect" {
-  api_id    = aws_apigatewayv2_api.api.id
-  route_key = "$disconnect"
-  target    = "integrations/${aws_apigatewayv2_integration.connections.id}"
-}
-
 resource "aws_apigatewayv2_integration" "default" {
   api_id           = aws_apigatewayv2_api.api.id
   integration_type = "AWS_PROXY"
@@ -54,30 +42,42 @@ resource "aws_lambda_permission" "bedrock" {
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.default.route_key}"
 }
 
-resource "aws_apigatewayv2_integration" "connections" {
-  api_id           = aws_apigatewayv2_api.api.id
-  integration_type = "AWS_PROXY"
+# resource "aws_apigatewayv2_route" "connect" {
+#   api_id    = aws_apigatewayv2_api.api.id
+#   route_key = "$connect"
+#   target    = "integrations/${aws_apigatewayv2_integration.connections.id}"
+# }
 
-  connection_type           = "INTERNET"
-  content_handling_strategy = "CONVERT_TO_TEXT"
-  description               = "Connect and Disconnect Websocket route"
-  integration_method        = "POST"
-  integration_uri           = aws_lambda_function.connection.invoke_arn
-  passthrough_behavior      = "WHEN_NO_MATCH"
-}
+# resource "aws_apigatewayv2_route" "disconnect" {
+#   api_id    = aws_apigatewayv2_api.api.id
+#   route_key = "$disconnect"
+#   target    = "integrations/${aws_apigatewayv2_integration.connections.id}"
+# }
 
-resource "aws_lambda_permission" "connect" {
-  statement_id  = "AllowConnectExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.connection.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.connect.route_key}"
-}
+# resource "aws_apigatewayv2_integration" "connections" {
+#   api_id           = aws_apigatewayv2_api.api.id
+#   integration_type = "AWS_PROXY"
 
-resource "aws_lambda_permission" "disconnect" {
-  statement_id  = "AllowDisconnectExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.connection.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.disconnect.route_key}"
-}
+#   connection_type           = "INTERNET"
+#   content_handling_strategy = "CONVERT_TO_TEXT"
+#   description               = "Connect and Disconnect Websocket route"
+#   integration_method        = "POST"
+#   integration_uri           = aws_lambda_function.connection.invoke_arn
+#   passthrough_behavior      = "WHEN_NO_MATCH"
+# }
+
+# resource "aws_lambda_permission" "connect" {
+#   statement_id  = "AllowConnectExecutionFromAPIGateway"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.connection.function_name
+#   principal     = "apigateway.amazonaws.com"
+#   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.connect.route_key}"
+# }
+
+# resource "aws_lambda_permission" "disconnect" {
+#   statement_id  = "AllowDisconnectExecutionFromAPIGateway"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.connection.function_name
+#   principal     = "apigateway.amazonaws.com"
+#   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/${aws_apigatewayv2_route.disconnect.route_key}"
+# }
