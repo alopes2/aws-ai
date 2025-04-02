@@ -8,10 +8,10 @@ func GetWeatherToolSchema() ToolSchema {
 	return ToolSchema{
 		Json: ToolJsonSchema{
 			Type: "object",
-			Properties: map[string]any{
-				"city": map[string]string{
-					"type":        "string",
-					"description": "The city to get the current weather for. Example cities are Berlin, New York, Paris",
+			Properties: ToolJsonSchemaProperties{
+				City: ToolJsonSchemaProperty{
+					Type:        "string",
+					Description: "The city to get the current weather for. Example cities are Berlin, New York, Paris",
 				},
 			},
 			Required: []string{
@@ -26,7 +26,16 @@ type ToolSchema struct {
 }
 
 type ToolJsonSchema struct {
-	Type       string         `json:"type"`
-	Required   []string       `json:"required"`
-	Properties map[string]any `json:"properties"`
+	Type       string                   `json:"type"`
+	Required   []string                 `json:"required"`
+	Properties ToolJsonSchemaProperties `json:"properties"`
+}
+
+type ToolJsonSchemaProperties struct {
+	City ToolJsonSchemaProperty `json:"city"`
+}
+
+type ToolJsonSchemaProperty struct {
+	Type        string `json:"type"`
+	Description string `json:"description"`
 }
