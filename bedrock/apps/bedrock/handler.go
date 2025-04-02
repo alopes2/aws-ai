@@ -7,10 +7,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/alopes2/aws-ai/bedrock/tools"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/document"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 )
 
@@ -44,6 +46,10 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 	}
 
 	response, err := h.callBedrock(request.Prompt, &ctx, event.RequestContext.ConnectionID)
+
+	if err != nil {
+		log.Fatal("Failed to call bedrock")
+	}
 
 	responseBody, _ := json.Marshal(Response{
 		Messages: response.Content,
@@ -99,7 +105,21 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 				Value: `You are a technology expert named Tony.
 				You answer technology related questions in a friendly and casual tone.
 				You break down complex topics into easy-to-understand explanations.
-				It's ok to not know the answer, but try your best to point to where the user might find more information about the topic.`,
+				It's ok to not know the answer, but try your best to point to where the user might find more information about the topic.
+				You are also allowed to get the current weather.`,
+			},
+		},
+		ToolConfig: &types.ToolConfiguration{
+			Tools: []types.Tool{
+				&types.ToolMemberToolSpec{
+					Value: types.ToolSpecification{
+						InputSchema: &types.ToolInputSchemaMemberJson{
+							Value: document.NewLazyDocument(tools.GetWeatherToolSchema()),
+						},
+						Name:        aws.String("GetWeather"),
+						Description: aws.String("Get the current weather for a city or location. It returns the weather simplified with the city in the response. Examples: 'It is sunny in Berlin', 'It is raining in Curitiba"),
+					},
+				},
 			},
 		},
 	}
@@ -129,37 +149,42 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 		case *types.ConverseStreamOutputMemberContentBlockDelta:
 			textResponse := e.Value.Delta.(*types.ContentBlockDeltaMemberText)
 
-			h.SendWebSocketMessageToConnection(ctx, textResponse.Value, "content", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, textResponse.Value, BedrockEventContent, connectionID)
 
 			combinedResult = combinedResult + textResponse.Value
 
 		case *types.ConverseStreamOutputMemberMessageStart:
 			log.Print("Message start")
 
-			h.SendWebSocketMessageToConnection(ctx, "", "message_start", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventMessageStart, connectionID)
 
 			msg.Role = string(e.Value.Role)
 
 		case *types.ConverseStreamOutputMemberMessageStop:
 			log.Printf("Message stop. Reason: %s", e.Value.StopReason)
+			log.Printf("Message additional values. %+v", e.Value.AdditionalModelResponseFields)
 
-			h.SendWebSocketMessageToConnection(ctx, "", "message_stop", connectionID)
+			if e.Value.StopReason == types.StopReasonToolUse {
+				h.SendWebSocketMessageToConnection(ctx, string(e.Value.StopReason), BedrockEventContent, connectionID)
+			} else {
+				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventMessageStop, connectionID)
+			}
 
 		case *types.ConverseStreamOutputMemberContentBlockStart:
 			log.Print("Content block start")
-			h.SendWebSocketMessageToConnection(ctx, "", "content_start", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStart, connectionID)
 
 			combinedResult = ""
 
 		case *types.ConverseStreamOutputMemberContentBlockStop:
 			log.Print("Content block stop")
-			h.SendWebSocketMessageToConnection(ctx, "", "content_stop", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStop, connectionID)
 
 			msg.Content = append(msg.Content, combinedResult)
 
 		case *types.ConverseStreamOutputMemberMetadata:
 			log.Printf("Metadata %+v", e.Value)
-			h.SendWebSocketMessageToConnection(ctx, fmt.Sprintf("%+v", e.Value), "metadata", connectionID)
+			h.SendWebSocketMessageToConnection(ctx, fmt.Sprintf("%+v", e.Value), BedrockEventMetadata, connectionID)
 
 		case *types.UnknownUnionMember:
 			log.Printf("unknown tag: %s", e.Tag)
@@ -173,7 +198,7 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 }
 
 func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textResponse string, event string, connectionID string) {
-	data, _ := json.Marshal(WebSocketResponse{Event: event, Data: textResponse})
+	data, _ := json.Marshal(WebSocketMessage{Event: event, Data: textResponse})
 
 	log.Printf("Sending to websocket %+v", data)
 
