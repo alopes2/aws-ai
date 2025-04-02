@@ -88,6 +88,9 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 	// 	},
 	// }
 
+	log.Printf("Tool Schema %+v", tools.GetWeatherToolSchema())
+	log.Printf("Input Schema Lazy Document %+v", document.NewLazyDocument(tools.GetWeatherToolSchema()))
+
 	input := &bedrockruntime.ConverseStreamInput{
 		ModelId: aws.String(h.modelID),
 		Messages: []types.Message{
