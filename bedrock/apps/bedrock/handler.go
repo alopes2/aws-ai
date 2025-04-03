@@ -120,7 +120,7 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 				&types.ToolMemberToolSpec{
 					Value: types.ToolSpecification{
 						InputSchema: &types.ToolInputSchemaMemberJson{
-							Value: document.NewLazyDocument(toolSchemaJSON),
+							Value: document.NewLazyDocument(tools.GetWeatherToolSchema()),
 						},
 						Name:        aws.String("GetWeather"),
 						Description: aws.String("Get the current weather for a city or location. It returns the weather simplified with the city in the response. Examples: 'It is sunny in Berlin', 'It is raining in Curitiba"),
