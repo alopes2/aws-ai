@@ -90,11 +90,9 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 
 	log.Printf("Tool Schema %+v", tools.GetWeatherToolSchema())
 
-	blah, _ := document.NewLazyDocument(tools.GetWeatherToolSchema()).MarshalSmithyDocument()
+	toolSchemaJSON, _ := json.Marshal(tools.GetWeatherToolSchema())
 
-	blah2, _ := json.Marshal(blah)
-
-	log.Printf("Input Schema Lazy Document %s", string(blah2))
+	log.Printf("Input Schema Lazy Document %s", string(toolSchemaJSON))
 
 	input := &bedrockruntime.ConverseStreamInput{
 		ModelId: aws.String(h.modelID),
@@ -122,7 +120,7 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 				&types.ToolMemberToolSpec{
 					Value: types.ToolSpecification{
 						InputSchema: &types.ToolInputSchemaMemberJson{
-							Value: document.NewLazyDocument(tools.GetWeatherToolSchema()),
+							Value: document.NewLazyDocument(toolSchemaJSON),
 						},
 						Name:        aws.String("GetWeather"),
 						Description: aws.String("Get the current weather for a city or location. It returns the weather simplified with the city in the response. Examples: 'It is sunny in Berlin', 'It is raining in Curitiba"),
