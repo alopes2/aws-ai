@@ -51,8 +51,15 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 		log.Fatal("Failed to call bedrock")
 	}
 
+	var messages []string
+	for _, content := range response.Content {
+		if textContent, ok := content.(*types.ContentBlockMemberText); ok {
+			messages = append(messages, textContent.Value)
+		}
+	}
+
 	responseBody, _ := json.Marshal(Response{
-		Messages: response.Content,
+		Messages: messages,
 	})
 
 	apiResponse := &events.APIGatewayProxyResponse{
@@ -63,7 +70,7 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 	return apiResponse, nil
 }
 
-func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID string) (*Message, error) {
+func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID string) (*types.Message, error) {
 	log.Printf("Sending input %s to model %s", prompt, h.modelID)
 
 	// input := &bedrockruntime.ConverseInput{
@@ -88,24 +95,29 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 	// 	},
 	// }
 
-	log.Printf("Tool Schema %+v", tools.GetWeatherToolSchema())
-
-	toolSchemaJSON, _ := json.Marshal(tools.GetWeatherToolSchema())
-
-	log.Printf("Input Schema Lazy Document %s", string(toolSchemaJSON))
-
-	input := &bedrockruntime.ConverseStreamInput{
-		ModelId: aws.String(h.modelID),
-		Messages: []types.Message{
-			{
-				Content: []types.ContentBlock{
-					&types.ContentBlockMemberText{
-						Value: prompt,
-					},
+	messages := []types.Message{
+		{
+			Content: []types.ContentBlock{
+				&types.ContentBlockMemberText{
+					Value: prompt,
 				},
-				Role: types.ConversationRoleUser,
 			},
+			Role: types.ConversationRoleUser,
 		},
+	}
+
+	msg, err := h.newFunction(ctx, &messages, connectionID)
+	if err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, connectionID string) (*types.Message, error) {
+	input := &bedrockruntime.ConverseStreamInput{
+		ModelId:  aws.String(h.modelID),
+		Messages: *messages,
 		System: []types.SystemContentBlock{
 			&types.SystemContentBlockMemberText{
 				Value: `You are a technology expert named Tony.
@@ -140,61 +152,87 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 
 	outputMessage := response.GetStream().Events()
 
-	msg := h.handleOutput(outputMessage, connectionID, ctx)
+	result, stopReason := h.handleOutput(outputMessage, connectionID, ctx)
 
-	return msg, nil
+	if stopReason == types.StopReasonToolUse {
+		*messages = append(*messages, *result)
+
+		result, err = h.newFunction(ctx, messages, connectionID)
+	}
+
+	return result, nil
 }
 
-func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, connectionID string, ctx *context.Context) *Message {
-	var combinedResult string
+func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, connectionID string, ctx *context.Context) (*types.Message, types.StopReason) {
+	var result string
+	var toolInput string
+	var stopReason types.StopReason
 
-	msg := Message{}
+	var msg types.Message
+	var toolUse types.ToolUseBlock
 
 	for event := range outputMessage {
 		switch e := event.(type) {
-		case *types.ConverseStreamOutputMemberContentBlockDelta:
-			switch delta := e.Value.Delta.(type) {
-			case *types.ContentBlockDeltaMemberText:
-
-				h.SendWebSocketMessageToConnection(ctx, delta.Value, BedrockEventContent, connectionID)
-
-				combinedResult = combinedResult + delta.Value
-			case *types.ContentBlockDeltaMemberToolUse:
-				log.Printf("Tool use delta: %s", *delta.Value.Input)
-			}
-
 		case *types.ConverseStreamOutputMemberMessageStart:
 			log.Print("Message start")
 
 			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventMessageStart, connectionID)
 
-			msg.Role = string(e.Value.Role)
-
-		case *types.ConverseStreamOutputMemberMessageStop:
-			log.Printf("Message stop. Reason: %s", e.Value.StopReason)
-			log.Printf("Message additional values. %+v", e.Value.AdditionalModelResponseFields)
-
-			if e.Value.StopReason == types.StopReasonToolUse {
-				h.SendWebSocketMessageToConnection(ctx, string(e.Value.StopReason), BedrockEventContent, connectionID)
-			} else {
-				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventMessageStop, connectionID)
-			}
+			msg.Role = e.Value.Role
 
 		case *types.ConverseStreamOutputMemberContentBlockStart:
 			log.Print("Content block start")
-			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStart, connectionID)
 
-			combinedResult = ""
+			switch blockStart := e.Value.Start.(type) {
+			case *types.ContentBlockStartMemberToolUse:
+				toolUse.Name = blockStart.Value.Name
+				toolUse.ToolUseId = blockStart.Value.ToolUseId
+			default:
+				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStart, connectionID)
+
+				result = ""
+			}
+
+		case *types.ConverseStreamOutputMemberContentBlockDelta:
+			switch delta := e.Value.Delta.(type) {
+			case *types.ContentBlockDeltaMemberText:
+				h.SendWebSocketMessageToConnection(ctx, delta.Value, BedrockEventContent, connectionID)
+				result = result + delta.Value
+
+			case *types.ContentBlockDeltaMemberToolUse:
+				if delta.Value.Input != nil {
+					toolInput = toolInput + *delta.Value.Input
+				}
+			}
 
 		case *types.ConverseStreamOutputMemberContentBlockStop:
 			log.Print("Content block stop")
-			h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStop, connectionID)
 
-			msg.Content = append(msg.Content, combinedResult)
+			if toolUse.Input != nil {
+				if jsonBytes, err := json.Marshal(toolInput); err != nil {
+					toolInput = string(jsonBytes)
+					toolUse.Input = document.NewLazyDocument(toolInput)
+					msg.Content = append(msg.Content, &types.ContentBlockMemberToolUse{
+						Value: toolUse,
+					})
+				}
+				toolUse = types.ToolUseBlock{}
+			} else {
+				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStop, connectionID)
+
+				msg.Content = append(msg.Content, &types.ContentBlockMemberText{
+					Value: result,
+				})
+			}
 
 		case *types.ConverseStreamOutputMemberMetadata:
 			log.Printf("Metadata %+v", e.Value)
 			h.SendWebSocketMessageToConnection(ctx, fmt.Sprintf("%+v", e.Value), BedrockEventMetadata, connectionID)
+
+		case *types.ConverseStreamOutputMemberMessageStop:
+			log.Printf("Message stop. Reason: %s", e.Value.StopReason)
+			stopReason = e.Value.StopReason
+			h.SendWebSocketMessageToConnection(ctx, string(e.Value.StopReason), BedrockEventMessageStop, connectionID)
 
 		case *types.UnknownUnionMember:
 			log.Printf("unknown tag: %s", e.Tag)
@@ -204,7 +242,7 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 		}
 	}
 
-	return &msg
+	return &msg, stopReason
 }
 
 func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textResponse string, event string, connectionID string) {

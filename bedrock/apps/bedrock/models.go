@@ -8,11 +8,6 @@ type Response struct {
 	Messages []string `json:"messages"`
 }
 
-type Message struct {
-	Role    string
-	Content []string
-}
-
 type WebSocketMessage struct {
 	Event string `json:"event"`
 	Data  string `json:"data"`
@@ -26,3 +21,9 @@ const (
 	BedrockEventContentStop  string = "content_stop"
 	BedrockEventMetadata     string = "metadata"
 )
+
+type ToolUse struct {
+	ToolUseID string
+	Name      string
+	Input     string
+}
