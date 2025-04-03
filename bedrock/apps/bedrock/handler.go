@@ -134,7 +134,7 @@ func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, c
 						InputSchema: &types.ToolInputSchemaMemberJson{
 							Value: document.NewLazyDocument(tools.GetWeatherToolSchema()),
 						},
-						Name:        aws.String("GetWeather"),
+						Name:        aws.String(tools.ToolGetWeather),
 						Description: aws.String("Get the current weather for a city or location. It returns the weather simplified with the city in the response. Examples: 'It is sunny in Berlin', 'It is raining in Curitiba"),
 					},
 				},
@@ -156,6 +156,37 @@ func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, c
 
 	if stopReason == types.StopReasonToolUse {
 		*messages = append(*messages, *result)
+
+		for _, content := range result.Content {
+			switch block := content.(type) {
+			case *types.ContentBlockMemberToolUse:
+				if *block.Value.Name == tools.ToolGetWeather {
+					var params map[string]string
+					_ = block.Value.Input.UnmarshalSmithyDocument(&params)
+
+					log.Printf("Got inputs %+v from tool", params)
+
+					weatherResult := tools.GetWeather(params["location"])
+
+					toolUseInput := map[string]string{
+						"weather": weatherResult,
+					}
+
+					*messages = append(*messages, types.Message{
+						Role: types.ConversationRoleUser,
+						Content: []types.ContentBlock{
+							&types.ContentBlockMemberToolUse{
+								Value: types.ToolUseBlock{
+									ToolUseId: block.Value.ToolUseId,
+									Name:      block.Value.Name,
+									Input:     document.NewLazyDocument(toolUseInput),
+								},
+							},
+						},
+					})
+				}
+			}
+		}
 
 		result, err = h.newFunction(ctx, messages, connectionID)
 	}
