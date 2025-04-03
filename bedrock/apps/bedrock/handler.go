@@ -206,7 +206,7 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 		case *types.ConverseStreamOutputMemberContentBlockStop:
 			log.Print("Content block stop")
 
-			if toolUse.Input != nil {
+			if toolInput != "" {
 				if jsonBytes, err := json.Marshal(toolInput); err != nil {
 					toolInput = string(jsonBytes)
 
@@ -218,6 +218,7 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 					})
 				}
 				toolUse = types.ToolUseBlock{}
+				toolInput = ""
 			} else {
 				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStop, connectionID)
 				log.Printf("Adding content text %s", result)
