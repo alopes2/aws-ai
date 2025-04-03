@@ -168,18 +168,18 @@ func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, c
 
 					weatherResult := tools.GetWeather(params["location"])
 
-					toolUseInput := map[string]string{
-						"weather": weatherResult,
-					}
-
 					*messages = append(*messages, types.Message{
 						Role: types.ConversationRoleUser,
 						Content: []types.ContentBlock{
-							&types.ContentBlockMemberToolUse{
-								Value: types.ToolUseBlock{
+							&types.ContentBlockMemberToolResult{
+								Value: types.ToolResultBlock{
 									ToolUseId: block.Value.ToolUseId,
-									Name:      block.Value.Name,
-									Input:     document.NewLazyDocument(toolUseInput),
+									Content: []types.ToolResultContentBlock{
+										&types.ToolResultContentBlockMemberText{
+											Value: weatherResult,
+										},
+									},
+									Status: types.ToolResultStatusSuccess,
 								},
 							},
 						},
