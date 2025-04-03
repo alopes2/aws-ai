@@ -229,8 +229,10 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 				result = result + delta.Value
 
 			case *types.ContentBlockDeltaMemberToolUse:
+				log.Printf("Got tool use input %s", *delta.Value.Input)
 				if delta.Value.Input != nil {
 					toolInput = toolInput + *delta.Value.Input
+					log.Printf("Current toolInput %s", toolInput)
 				}
 			}
 
@@ -238,10 +240,12 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 			log.Print("Content block stop")
 
 			if toolInput != "" {
+
+				log.Printf("Tool Input %s", toolInput)
 				if jsonBytes, err := json.Marshal(toolInput); err != nil {
 					toolInput = string(jsonBytes)
 
-					log.Printf("Tool Input %s", toolInput)
+					log.Printf("Tool Input after marshal %s", toolInput)
 
 					toolUse.Input = document.NewLazyDocument(toolInput)
 					msg.Content = append(msg.Content, &types.ContentBlockMemberToolUse{
