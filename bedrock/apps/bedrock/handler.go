@@ -189,8 +189,6 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 				toolUse.ToolUseId = blockStart.Value.ToolUseId
 			default:
 				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStart, connectionID)
-
-				result = ""
 			}
 
 		case *types.ConverseStreamOutputMemberContentBlockDelta:
@@ -211,6 +209,9 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 			if toolUse.Input != nil {
 				if jsonBytes, err := json.Marshal(toolInput); err != nil {
 					toolInput = string(jsonBytes)
+
+					log.Printf("Tool Input %s", toolInput)
+
 					toolUse.Input = document.NewLazyDocument(toolInput)
 					msg.Content = append(msg.Content, &types.ContentBlockMemberToolUse{
 						Value: toolUse,
@@ -219,10 +220,11 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 				toolUse = types.ToolUseBlock{}
 			} else {
 				h.SendWebSocketMessageToConnection(ctx, "", BedrockEventContentStop, connectionID)
-
+				log.Printf("Adding content text %s", result)
 				msg.Content = append(msg.Content, &types.ContentBlockMemberText{
 					Value: result,
 				})
+				result = ""
 			}
 
 		case *types.ConverseStreamOutputMemberMetadata:
