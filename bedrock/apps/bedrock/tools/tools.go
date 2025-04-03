@@ -1,21 +1,33 @@
 package tools
 
-func GetWeather(city string) string {
-	return "It is sunny in " + city
+func GetWeather(location string) string {
+	return "It is sunny in " + location
 }
 
-func GetWeatherToolSchema() ToolJsonSchema {
-	return ToolJsonSchema{
-		Type: "object",
-		Properties: ToolJsonSchemaProperties{
-			"city": ToolJsonSchemaProperty{
-				Type:        "string",
-				Description: "The city to get the current weather for. Example cities are Berlin, New York, Paris",
+// func GetWeatherToolSchema() ToolJsonSchema {
+func GetWeatherToolSchema() map[string]interface{} {
+	// return ToolJsonSchema{
+	// 	Type: "object",
+	// 	Properties: ToolJsonSchemaProperties{
+	// 		"city": ToolJsonSchemaProperty{
+	// 			Type:        "string",
+	// 			Description: "The city to get the current weather for. Example cities are Berlin, New York, Paris",
+	// 		},
+	// 	},
+	// 	Required: []string{
+	// 		"city",
+	// 	},
+	// }
+
+	return map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"location": map[string]interface{}{
+				"type":        "string",
+				"description": "The city or location to get the weather for. Example locations are Berlin, New York, Paris",
 			},
 		},
-		Required: []string{
-			"city",
-		},
+		"required": []string{"location"},
 	}
 }
 
