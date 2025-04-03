@@ -73,6 +73,26 @@ func (h *Handler) HandleRequest(ctx context.Context, event events.APIGatewayWebs
 func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID string) (*types.Message, error) {
 	log.Printf("Sending input %s to model %s", prompt, h.modelID)
 
+	messages := []types.Message{
+		{
+			Content: []types.ContentBlock{
+				&types.ContentBlockMemberText{
+					Value: prompt,
+				},
+			},
+			Role: types.ConversationRoleUser,
+		},
+	}
+
+	msg, err := h.streamMessages(ctx, &messages, connectionID)
+	if err != nil {
+		return nil, err
+	}
+
+	return msg, nil
+}
+
+func (h *Handler) streamMessages(ctx *context.Context, messages *[]types.Message, connectionID string) (*types.Message, error) {
 	// input := &bedrockruntime.ConverseInput{
 	// 	ModelId: aws.String(h.modelID),
 	// 	Messages: []types.Message{
@@ -95,26 +115,6 @@ func (h *Handler) callBedrock(prompt string, ctx *context.Context, connectionID 
 	// 	},
 	// }
 
-	messages := []types.Message{
-		{
-			Content: []types.ContentBlock{
-				&types.ContentBlockMemberText{
-					Value: prompt,
-				},
-			},
-			Role: types.ConversationRoleUser,
-		},
-	}
-
-	msg, err := h.newFunction(ctx, &messages, connectionID)
-	if err != nil {
-		return nil, err
-	}
-
-	return msg, nil
-}
-
-func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, connectionID string) (*types.Message, error) {
 	input := &bedrockruntime.ConverseStreamInput{
 		ModelId:  aws.String(h.modelID),
 		Messages: *messages,
@@ -188,7 +188,7 @@ func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, c
 			}
 		}
 
-		result, err = h.newFunction(ctx, messages, connectionID)
+		result, err = h.streamMessages(ctx, messages, connectionID)
 	}
 
 	return result, nil
