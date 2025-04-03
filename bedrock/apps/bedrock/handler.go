@@ -153,11 +153,15 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 	for event := range outputMessage {
 		switch e := event.(type) {
 		case *types.ConverseStreamOutputMemberContentBlockDelta:
-			textResponse := e.Value.Delta.(*types.ContentBlockDeltaMemberText)
+			switch delta := e.Value.Delta.(type) {
+			case *types.ContentBlockDeltaMemberText:
 
-			h.SendWebSocketMessageToConnection(ctx, textResponse.Value, BedrockEventContent, connectionID)
+				h.SendWebSocketMessageToConnection(ctx, delta.Value, BedrockEventContent, connectionID)
 
-			combinedResult = combinedResult + textResponse.Value
+				combinedResult = combinedResult + delta.Value
+			case *types.ContentBlockDeltaMemberToolUse:
+				log.Printf("Tool use delta: %s", *delta.Value.Input)
+			}
 
 		case *types.ConverseStreamOutputMemberMessageStart:
 			log.Print("Message start")
@@ -206,20 +210,16 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 func (h *Handler) SendWebSocketMessageToConnection(ctx *context.Context, textResponse string, event string, connectionID string) {
 	data, _ := json.Marshal(WebSocketMessage{Event: event, Data: textResponse})
 
-	log.Printf("Sending to websocket %+v", data)
-
 	websocketInput := &apigatewaymanagementapi.PostToConnectionInput{
 		ConnectionId: aws.String(connectionID),
 		Data:         []byte(data),
 	}
 
-	response, err := h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
+	_, err := h.apiGatewayManagementClient.PostToConnection(*ctx, websocketInput)
 
 	if err != nil {
 		log.Printf("ERROR %+v", err)
 	}
-
-	log.Printf("Output from websocket %+v", response)
 }
 
 func NewHandler(config aws.Config) *Handler {
