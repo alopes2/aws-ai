@@ -164,7 +164,7 @@ func (h *Handler) newFunction(ctx *context.Context, messages *[]types.Message, c
 					var params map[string]string
 					_ = block.Value.Input.UnmarshalSmithyDocument(&params)
 
-					log.Printf("Got inputs %+v from tool", params)
+					log.Printf("Got inputs %s from tool", params["location"])
 
 					weatherResult := tools.GetWeather(params["location"])
 
@@ -238,8 +238,8 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 			log.Print("Content block stop")
 
 			if toolInput != "" {
-				if _, err := json.Marshal(toolInput); err == nil {
-					// toolInput = string(jsonBytes)
+				if jsonBytes, err := json.Marshal(toolInput); err == nil {
+					toolInput = string(jsonBytes)
 
 					log.Printf("Tool Input after marshal %s", toolInput)
 
