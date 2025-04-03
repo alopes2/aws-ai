@@ -238,12 +238,9 @@ func (h *Handler) handleOutput(outputMessage <-chan types.ConverseStreamOutput, 
 			log.Print("Content block stop")
 
 			if toolInput != "" {
-				if jsonBytes, err := json.Marshal(toolInput); err == nil {
-					toolInput = string(jsonBytes)
-
-					log.Printf("Tool Input after marshal %s", toolInput)
-
-					toolUse.Input = document.NewLazyDocument(toolInput)
+				var toolInputMap map[string]string
+				if err := json.Unmarshal([]byte(toolInput), &toolInputMap); err == nil {
+					toolUse.Input = document.NewLazyDocument(toolInputMap)
 					msg.Content = append(msg.Content, &types.ContentBlockMemberToolUse{
 						Value: toolUse,
 					})
